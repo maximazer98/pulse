@@ -67474,7 +67474,7 @@ dZ(){var s=0,r=A.C(t.H),q=this,p,o,n,m,l,k,j,i
 var $async$dZ=A.D(function(a,b){if(a===1)return A.z(b,r)
 for(;;)switch(s){case 0:k=q.p1.ax
 q.ec=k.gu().a[0]/2
-q.ed=k.gu().a[1]*0.78
+q.ed=k.gu().a[1]*0.65
 p=q.ak,o=0
 case 2:if(!(o<4)){s=4
 break}n=B.lx[o]
