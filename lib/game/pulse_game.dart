@@ -360,6 +360,7 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
 
   @override
   void onTapDown(TapDownEvent event) {
+    AudioService.unlockAudio();
     if (gameState == GameState.playing) {
       targetX = event.localPosition.x;
     }
@@ -367,6 +368,7 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
 
   @override
   void onPanStart(DragStartInfo info) {
+    AudioService.unlockAudio();
     if (gameState == GameState.playing) {
       targetX = info.eventPosition.global.x;
     }

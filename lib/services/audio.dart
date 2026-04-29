@@ -22,6 +22,14 @@ class AudioService {
     await prefs.setBool(_kMuted, muted.value);
   }
 
+  static bool _audioUnlocked = false;
+
+  static Future<void> unlockAudio() async {
+    if (_audioUnlocked || !kIsWeb) return;
+    _audioUnlocked = true;
+    FlameAudio.play('score.wav', volume: 0.0).then((_) {}, onError: (_) {});
+  }
+
   static void play(String file, {double volume = 0.6}) {
     if (muted.value || !_assetsPresent) return;
     FlameAudio.play(file, volume: volume).then((_) {}, onError: (_) {});
