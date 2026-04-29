@@ -1,11 +1,14 @@
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
+import 'dart:js' as js;
 
 class AudioService {
   static const _kMuted = 'muted';
   static final ValueNotifier<bool> muted = ValueNotifier(false);
   static bool _initialized = false;
+  static bool _audioUnlocked = false;
   // Flip to true once real WAV assets exist in assets/audio/.
   static const bool _assetsPresent = true;
 
@@ -22,12 +25,15 @@ class AudioService {
     await prefs.setBool(_kMuted, muted.value);
   }
 
-  static bool _audioUnlocked = false;
-
   static Future<void> unlockAudio() async {
     if (_audioUnlocked || !kIsWeb) return;
     _audioUnlocked = true;
-    FlameAudio.play('score.wav', volume: 0.0).then((_) {}, onError: (_) {});
+    try {
+      js.context.callMethod('eval', [
+        '(new (window.AudioContext||window.webkitAudioContext)()).resume()'
+      ]);
+    } catch (_) {}
+    FlameAudio.play('score.wav', volume: 0.01).then((_) {}, onError: (_) {});
   }
 
   static void play(String file, {double volume = 0.6}) {
