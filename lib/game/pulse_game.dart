@@ -89,7 +89,7 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
   @override
   Future<void> onLoad() async {
     targetX = size.x / 2;
-    ballY = size.y * 0.78;
+    ballY = size.y * 0.65;
 
     for (final m in GameMode.values) {
       if (m == GameMode.daily) continue;
