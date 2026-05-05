@@ -135,6 +135,7 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
       text: '0',
       position: Vector2(size.x / 2, 110),
       anchor: Anchor.center,
+      priority: 100,
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Color(0xFFFFFFFF),
@@ -314,7 +315,13 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
     if (!canContinue) return;
     Wallet.spend(50);
     _continueUsed = true;
-    removeWhere((c) => c is RectangleComponent || c is Coin || c is CoinBurst || c is SkinSpark);
+    removeWhere((c) =>
+        c is RectangleComponent ||
+        c is Coin ||
+        c is CoinBurst ||
+        c is SkinSpark ||
+        c is ScorePulse ||
+        c is CloseCallText);
     timeSinceLastObstacle = 0;
     _invincible = true;
     _invincibleTimer = 3.0;
@@ -345,7 +352,14 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
     _invincibleTimer = 0.0;
     _shieldActive = false;
     shieldActiveNotifier.value = false;
-    removeWhere((c) => c is RectangleComponent || c is ParticleDot || c is Coin || c is CoinBurst || c is SkinSpark);
+    removeWhere((c) =>
+        c is RectangleComponent ||
+        c is ParticleDot ||
+        c is Coin ||
+        c is CoinBurst ||
+        c is SkinSpark ||
+        c is ScorePulse ||
+        c is CloseCallText);
     if (scoreText.parent != null) remove(scoreText);
     gameState = GameState.menu;
     overlays.remove('pause');
@@ -354,7 +368,14 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
   }
 
   void retry() {
-    removeWhere((c) => c is RectangleComponent || c is ParticleDot || c is Coin || c is CoinBurst || c is SkinSpark);
+    removeWhere((c) =>
+        c is RectangleComponent ||
+        c is ParticleDot ||
+        c is Coin ||
+        c is CoinBurst ||
+        c is SkinSpark ||
+        c is ScorePulse ||
+        c is CloseCallText);
     startGame(mode);
   }
 
@@ -573,11 +594,15 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
     // Coins only in Classic/Daily — Zen would enable infinite farming (no game over),
     // Hardcore stays pure.
     if ((mode == GameMode.classic || mode == GameMode.daily) && random.nextDouble() < 0.15) {
-      final coinX = gapX + currentGap / 2 + (random.nextDouble() - 0.5) * (currentGap * 0.4);
+      final randomOffset = (random.nextDouble() - 0.5) * (currentGap * 0.4);
+      final coinX = gapX + currentGap / 2 + randomOffset;
       add(Coin(
         position: Vector2(coinX, startY + barHeight / 2),
         game: this,
         speed: obstacleSpeed,
+        baseGapCenterX: coinX,
+        swayAmplitude: swayAmplitude,
+        swaySpeed: swaySpeed,
       ));
     }
   }

@@ -1,22 +1,27 @@
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
-import 'dart:js' as js;
 
 class AudioService {
   static const _kMuted = 'muted';
   static final ValueNotifier<bool> muted = ValueNotifier(false);
   static bool _initialized = false;
   static bool _audioUnlocked = false;
-  // Flip to true once real WAV assets exist in assets/audio/.
   static const bool _assetsPresent = true;
+
+  static const List<String> _files = ['pass.wav', 'close.wav', 'gameover.wav', 'score.wav'];
+  static final Map<String, AudioPool> _pools = {};
 
   static Future<void> init() async {
     if (_initialized) return;
     _initialized = true;
     final prefs = await SharedPreferences.getInstance();
     muted.value = prefs.getBool(_kMuted) ?? false;
+    for (final f in _files) {
+      try {
+        _pools[f] = await FlameAudio.createPool(f, maxPlayers: 4, minPlayers: 1);
+      } catch (_) {}
+    }
   }
 
   static Future<void> toggleMute() async {
@@ -28,16 +33,27 @@ class AudioService {
   static Future<void> unlockAudio() async {
     if (_audioUnlocked || !kIsWeb) return;
     _audioUnlocked = true;
-    try {
-      js.context.callMethod('eval', [
-        '(new (window.AudioContext||window.webkitAudioContext)()).resume()'
-      ]);
-    } catch (_) {}
-    FlameAudio.play('score.wav', volume: 0.01).then((_) {}, onError: (_) {});
+    if (kIsWeb) _unlockWebAudio();
+    final pool = _pools['score.wav'];
+    if (pool != null) {
+      pool.start(volume: 0.01).catchError((_) => () async {});
+    } else {
+      FlameAudio.play('score.wav', volume: 0.01).then((_) {}, onError: (_) {});
+    }
+  }
+
+  static void _unlockWebAudio() {
+    // Implemented in audio_web.dart via conditional import at call site.
+    // On non-web this stub is never reached due to kIsWeb guard above.
   }
 
   static void play(String file, {double volume = 0.6}) {
     if (muted.value || !_assetsPresent) return;
-    FlameAudio.play(file, volume: volume).then((_) {}, onError: (_) {});
+    final pool = _pools[file];
+    if (pool != null) {
+      pool.start(volume: volume).catchError((_) => () async {});
+    } else {
+      FlameAudio.play(file, volume: volume).then((_) {}, onError: (_) {});
+    }
   }
 }

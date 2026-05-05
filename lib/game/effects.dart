@@ -129,11 +129,20 @@ class CloseCallText extends TextComponent {
 class Coin extends CircleComponent {
   final PulseGame game;
   final double speed;
+  final double baseGapCenterX;
+  final double swayAmplitude;
+  final double swaySpeed;
   double time = 0;
   bool collected = false;
 
-  Coin({required Vector2 position, required this.game, required this.speed})
-      : super(
+  Coin({
+    required Vector2 position,
+    required this.game,
+    required this.speed,
+    required this.baseGapCenterX,
+    this.swayAmplitude = 0,
+    this.swaySpeed = 0,
+  }) : super(
           radius: 9,
           position: position,
           anchor: Anchor.center,
@@ -153,6 +162,9 @@ class Coin extends CircleComponent {
     }
     position.y += speed * dt;
     time += dt;
+    if (swayAmplitude > 0) {
+      position.x = baseGapCenterX + sin(time * swaySpeed) * swayAmplitude;
+    }
     final pulse = 1 + sin(time * 8) * 0.12;
     scale = Vector2.all(pulse);
 
