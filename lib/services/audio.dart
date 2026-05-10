@@ -13,7 +13,7 @@ class AudioService {
   static const bool _musicPresent = true;
   static bool _musicPlaying = false;
 
-  static const List<String> _files = ['pass.wav', 'close.wav', 'gameover.wav', 'score.wav'];
+  static const List<String> _files = ['pass.wav', 'close.wav', 'gameover.wav', 'score.wav', 'coin.ogg'];
   static final Map<String, AudioPool> _pools = {};
 
   static Future<void> init() async {

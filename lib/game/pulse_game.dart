@@ -617,7 +617,7 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
 
   void onCoinCollected(Vector2 pos) {
     Wallet.add(1);
-    AudioService.play('close.wav', volume: 0.4);
+    AudioService.play('coin.ogg', volume: 0.5);
     Haptics.light();
     add(CoinBurst(position: pos));
   }
