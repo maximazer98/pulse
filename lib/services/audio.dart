@@ -10,7 +10,7 @@ class AudioService {
   static const bool _assetsPresent = true;
 
   // Set to true once music.ogg is placed in assets/audio/
-  static const bool _musicPresent = false;
+  static const bool _musicPresent = true;
   static bool _musicPlaying = false;
 
   static const List<String> _files = ['pass.wav', 'close.wav', 'gameover.wav', 'score.wav'];
