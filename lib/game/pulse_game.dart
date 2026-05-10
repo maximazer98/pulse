@@ -216,9 +216,11 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
     if (paused) {
       resumeEngine();
       overlays.remove('pause');
+      AudioService.resumeMusic();
     } else {
       pauseEngine();
       overlays.add('pause');
+      AudioService.pauseMusic();
     }
   }
 
@@ -269,6 +271,7 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
     overlays.remove('game_over');
     if (scoreText.parent == null) add(scoreText);
     if (!_hintShown) hintNotifier.value = true;
+    AudioService.playMusic();
   }
 
   void triggerGameOver() {
@@ -290,6 +293,7 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
         EffectController(duration: 0.05, alternate: true, repeatCount: 6),
       ),
     );
+    AudioService.stopMusic();
     AudioService.play('gameover.wav', volume: 0.7);
     Haptics.heavy();
     if (score > bestScore) {
@@ -343,6 +347,7 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
   }
 
   void backToMenu() {
+    AudioService.stopMusic();
     if (paused) resumeEngine();
     // If we leave during a live run (zen quit, pause→menu), count it as ended.
     if (gameState == GameState.playing && score > 0) {
@@ -549,16 +554,19 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
   }
 
   void _spawnObstacle() {
+    final effectiveBase = isZen
+        ? gapSize
+        : (gapSize - score * 1.5).clamp(80.0, gapSize);
     final variance = random.nextDouble();
     double currentGap;
     if (variance < 0.15) {
-      currentGap = gapSize * 1.5;
+      currentGap = effectiveBase * 1.5;
     } else if (mode == GameMode.hardcore || variance > 0.85) {
-      currentGap = gapSize * 0.75;
+      currentGap = effectiveBase * 0.75;
     } else {
-      currentGap = gapSize;
+      currentGap = effectiveBase;
     }
-    if (isZen) currentGap = gapSize * 1.25; // gentler gaps in Zen
+    if (isZen) currentGap = effectiveBase * 1.25;
     if (mode == GameMode.daily) currentGap *= todayModifier.gapMult;
 
     final canMove = _canSway();
@@ -658,13 +666,13 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
 
     switch (mode) {
       case GameMode.classic:
-        obstacleSpeed = 200 + score * 3.5;
-        spawnInterval = (1.8 - score * 0.02).clamp(0.95, 1.8);
+        obstacleSpeed = 200 + score * 5.0;
+        spawnInterval = (1.6 - score * 0.025).clamp(0.85, 1.6);
         break;
       case GameMode.daily:
         final mod = todayModifier;
-        obstacleSpeed = (200 + score * 3.5) * mod.speedMult;
-        spawnInterval = ((1.8 - score * 0.02).clamp(0.95, 1.8)) * mod.spawnMult;
+        obstacleSpeed = (200 + score * 5.0) * mod.speedMult;
+        spawnInterval = ((1.6 - score * 0.025).clamp(0.85, 1.6)) * mod.spawnMult;
         break;
       case GameMode.zen:
         // Zen: tiny ramp so it doesn't stay trivial forever.

@@ -9,6 +9,10 @@ class AudioService {
   static bool _audioUnlocked = false;
   static const bool _assetsPresent = true;
 
+  // Set to true once music.ogg is placed in assets/audio/
+  static const bool _musicPresent = false;
+  static bool _musicPlaying = false;
+
   static const List<String> _files = ['pass.wav', 'close.wav', 'gameover.wav', 'score.wav'];
   static final Map<String, AudioPool> _pools = {};
 
@@ -17,6 +21,7 @@ class AudioService {
     _initialized = true;
     final prefs = await SharedPreferences.getInstance();
     muted.value = prefs.getBool(_kMuted) ?? false;
+    if (_musicPresent) FlameAudio.bgm.initialize();
     for (final f in _files) {
       try {
         _pools[f] = await FlameAudio.createPool(f, maxPlayers: 4, minPlayers: 1);
@@ -24,10 +29,39 @@ class AudioService {
     }
   }
 
+  static Future<void> playMusic() async {
+    _musicPlaying = true;
+    if (!_musicPresent || muted.value) return;
+    try {
+      await FlameAudio.bgm.play('music.ogg', volume: 0.35);
+    } catch (_) {}
+  }
+
+  static void stopMusic() {
+    _musicPlaying = false;
+    if (!_musicPresent) return;
+    try { FlameAudio.bgm.stop(); } catch (_) {}
+  }
+
+  static void pauseMusic() {
+    if (!_musicPresent || !_musicPlaying) return;
+    try { FlameAudio.bgm.pause(); } catch (_) {}
+  }
+
+  static void resumeMusic() {
+    if (!_musicPresent || !_musicPlaying || muted.value) return;
+    try { FlameAudio.bgm.resume(); } catch (_) {}
+  }
+
   static Future<void> toggleMute() async {
     muted.value = !muted.value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kMuted, muted.value);
+    if (muted.value) {
+      pauseMusic();
+    } else {
+      resumeMusic();
+    }
   }
 
   static Future<void> unlockAudio() async {
