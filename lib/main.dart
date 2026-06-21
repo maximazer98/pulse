@@ -871,13 +871,11 @@ class _SkinShopSheetState extends State<SkinShopSheet> {
     );
     if (ok) {
       await Skins.equip(s.id);
-      if (mounted) setState(() {});
     }
   }
 
   Future<void> _equip(String id) async {
     await Skins.equip(id);
-    if (mounted) setState(() {});
   }
 
   @override
@@ -1365,30 +1363,32 @@ class GameOverOverlay extends StatefulWidget {
 }
 
 class _GameOverOverlayState extends State<GameOverOverlay> with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-  late final Animation<double> _flashOpacity;
-  late final Animation<Offset> _slideIn;
-  late final Animation<double> _fadeIn;
+  AnimationController? _ctrl;
+  Animation<double>? _flashOpacity;
+  Animation<Offset>? _slideIn;
+  Animation<double>? _fadeIn;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
-    _flashOpacity = TweenSequence([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.35), weight: 30),
-      TweenSequenceItem(tween: Tween(begin: 0.35, end: 0.0), weight: 70),
-    ]).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
-    _slideIn = Tween(begin: const Offset(0, 0.5), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _ctrl, curve: const Interval(0.1, 0.6, curve: Curves.easeOut)));
-    _fadeIn = Tween(begin: 0.0, end: 1.0)
-        .animate(CurvedAnimation(parent: _ctrl, curve: const Interval(0.1, 0.5)));
     final isNewBest = widget.game.score > 0 && widget.game.score == widget.game.bestScore;
-    if (isNewBest) _ctrl.forward();
+    if (isNewBest) {
+      _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+      _flashOpacity = TweenSequence([
+        TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.35), weight: 30),
+        TweenSequenceItem(tween: Tween(begin: 0.35, end: 0.0), weight: 70),
+      ]).animate(CurvedAnimation(parent: _ctrl!, curve: Curves.easeOut));
+      _slideIn = Tween(begin: const Offset(0, 0.5), end: Offset.zero)
+          .animate(CurvedAnimation(parent: _ctrl!, curve: const Interval(0.1, 0.6, curve: Curves.easeOut)));
+      _fadeIn = Tween(begin: 0.0, end: 1.0)
+          .animate(CurvedAnimation(parent: _ctrl!, curve: const Interval(0.1, 0.5)));
+      _ctrl!.forward();
+    }
   }
 
   @override
   void dispose() {
-    _ctrl.dispose();
+    _ctrl?.dispose();
     super.dispose();
   }
 
@@ -1431,9 +1431,9 @@ class _GameOverOverlayState extends State<GameOverOverlay> with SingleTickerProv
                 const SizedBox(height: 4),
                 if (isNewBest)
                   SlideTransition(
-                    position: _slideIn,
+                    position: _slideIn!,
                     child: FadeTransition(
-                      opacity: _fadeIn,
+                      opacity: _fadeIn!,
                       child: Text(
                         L10n.t('NEUE BESTLEISTUNG!', 'NEW HIGH SCORE!'),
                         style: const TextStyle(
@@ -1500,10 +1500,10 @@ class _GameOverOverlayState extends State<GameOverOverlay> with SingleTickerProv
       children: [
         overlay,
         AnimatedBuilder(
-          animation: _flashOpacity,
+          animation: _flashOpacity!,
           builder: (context, child) => IgnorePointer(
             child: Container(
-              color: const Color(0xFFFFD166).withAlpha((_flashOpacity.value * 255).toInt()),
+              color: const Color(0xFFFFD166).withAlpha((_flashOpacity!.value * 255).toInt()),
             ),
           ),
         ),

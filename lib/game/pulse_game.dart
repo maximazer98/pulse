@@ -628,9 +628,9 @@ class PulseGame extends FlameGame with TapCallbacks, PanDetector {
         return score >= 8 && random.nextDouble() < 0.3;
       case GameMode.daily:
         final mod = todayModifier;
-        if (mod.swayChance >= 0) {
+        if (mod.swayChance != null) {
           final allowed = mod.swayFromStart || score >= 4;
-          return allowed && random.nextDouble() < mod.swayChance;
+          return allowed && random.nextDouble() < mod.swayChance!;
         }
         return score >= 8 && random.nextDouble() < 0.3;
       case GameMode.zen:

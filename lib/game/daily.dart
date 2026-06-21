@@ -9,7 +9,7 @@ class DailyModifier {
   final double speedMult;
   final double gapMult;
   final double spawnMult;
-  final double swayChance; // 0..1, overrides normal gate
+  final double? swayChance; // 0..1 overrides normal gate; null = keep default (classic rule)
   final bool swayFromStart;
   final int bronze;
   final int silver;
@@ -24,7 +24,7 @@ class DailyModifier {
     this.speedMult = 1.0,
     this.gapMult = 1.0,
     this.spawnMult = 1.0,
-    this.swayChance = -1, // -1 = keep default (classic rule)
+    this.swayChance, // null = keep default (classic rule)
     this.swayFromStart = false,
     required this.bronze,
     required this.silver,
